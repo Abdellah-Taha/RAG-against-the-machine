@@ -201,3 +201,7 @@ uv run python -m moulinette evaluate_student_answers <student_answer_path>
   ]
 
 }
+https://medium.com/@amalhan43/build-rag-from-scratch-a-beginners-step-by-step-guide-fd3cbdc0b2fd
+https://huggingface.co/blog/ngxson/make-your-own-rag
+https://www.meilisearch.com/blog/rag-indexing
+https://www.ibm.com/think/topics/retrieval-augmented-generation
