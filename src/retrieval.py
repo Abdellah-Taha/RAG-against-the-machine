@@ -1,7 +1,6 @@
 import time
 import bm25s
-from data_loading import *
-from indexing import index_files
+from indexing import *
 
 
 def retrieval(query: str, k: int):
@@ -15,7 +14,7 @@ def retrieval(query: str, k: int):
         exit(4)
 
 def main():
-    query="What activation formats does the fused batched MoE layer return in vLLM?"
+    query="What's the default value of trust_remote_code in vLLM's LLM class constructor?"
     k=5
     start_time = time.time()
     meta_data = index_files()

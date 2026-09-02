@@ -1,12 +1,4 @@
-import bm25s
-import pathlib
-import time
-import io
-from typing import List
-from langchain_core.documents import Document
-
-
-from data_loading import retrieve_files, load_and_split
+from data_loading import *
 
 data_path = pathlib.Path("vllm-0.10.1")
 chunk_size=500
