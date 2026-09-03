@@ -1,6 +1,7 @@
 import time
 import bm25s
-from indexing import *
+# from indexing import *
+from indexing import index_files
 
 
 def retrieval(query: str, k: int):

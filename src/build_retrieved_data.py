@@ -1,6 +1,8 @@
-from retrieval import *
-from data_models import *
-
+from data_models import MinimalSearchResults, MinimalSource, StudentSearchResults
+from typing import List
+from retrieval import retrieval
+from indexing import index_files
+import time
 
 def build_retrieved_data(query: str, k: int, meta_data: List[dict]):
     minimal_search_results = MinimalSearchResults(question_id="", question=query, retrieved_sources=[])
@@ -26,7 +28,7 @@ def main():
     queries = ["What activation formats does the fused batched MoE layer return in vLLM?",
                "What are the default values for FP8_MIN and FP8_MAX constants in vLLM's triton_flash_attention module?",
                "What determines whether vLLM's sampler returns Pythonized results or deferred Pythonization arguments?"]
-    k = 3
+    k = 5
     start_time = time.time()
     meta_data = index_files()
     end_time = time.time()
