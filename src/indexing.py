@@ -1,13 +1,12 @@
 from typing import List
 from data_loading import retrieve_files, load_and_split
 from langchain_core.documents import Document
-import time, bm25s, pathlib
+import bm25s, pathlib
 
 
 data_path = pathlib.Path("data/raw/vllm-0.10.1")
-chunk_size=500
 
-def index_files() -> List[dict]:
+def index_files(chunk_size: int) -> List[dict]:
     try:
         sample = retrieve_files(data_path)
         documents: List[Document] = load_and_split(sample, chunk_size)
@@ -30,10 +29,3 @@ def index_files() -> List[dict]:
     except Exception as e:
         print(f"Error during indexing: {e}")
         exit(3)
-    
-
-# if __name__ == "__main__":
-#     start_time = time.time()
-#     index_files()
-#     end_time = time.time()
-#     print(f"Indexing complete in {end_time - start_time:.2f} seconds. You can now use the BM25 retriever for searching.")

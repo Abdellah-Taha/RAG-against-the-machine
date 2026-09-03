@@ -44,33 +44,3 @@ def load_and_split(list_of_files: list[pathlib.Path], chunk_size) -> List[Docume
     except BaseException as e:
         print(e)
         exit(2) 
-
-
-# def read_file(list_of_files: list[pathlib.Path], chunk_size: int = 200) -> str:
-#     documents = []
-#     for file_path in list_of_files:
-#         try:
-#             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-#                 content = f.read()
-#                 if content.strip():  # Only add non-empty files
-#                     documents.extend([content[i:i + chunk_size] for i in range(0, len(content), chunk_size)])
-#         except Exception as e:
-#             print(f"Warning: Could not read {file_path}: {e}")
-#     return documents
-
-def main():
-    files = retrieve_files(data)
-    print(f"Found {len(files)} files")
-    for f in files[:5]:
-        print(f"  {f}")
-
-    documents = load_and_split(files)
-    print(f"\nProduced {len(documents)} chunks")
-    if documents:
-        print("\nFirst chunk preview:")
-        print(f"  source: {documents[0].metadata.get('source')}")
-        print(f"  content: {documents[0].page_content[:200]!r}")
-
-
-if __name__ == "__main__":
-    main()

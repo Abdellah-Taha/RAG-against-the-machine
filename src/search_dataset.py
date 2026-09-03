@@ -1,7 +1,6 @@
 from typing import List
-from indexing import index_files
 from build_retrieved_data import total_search_results
-import json, time
+import json
 
 path_code = "datasets_public/public/AnsweredQuestions/dataset_code_public.json"
 path_docs = "datasets_public/public/AnsweredQuestions/dataset_docs_public.json"
@@ -43,21 +42,4 @@ def review_results(path: str, k: int, meta_data: List[dict]):
     print(f"Total Questions: {total}")
     print(f"total student answers: {len(student_search_results.search_results)}")
     print(f"recall@{k}: {correct_count}/{total}  ({(correct_count/total)*100:.2f}%)")
-    
-def main():
-    start_time = time.time()
-    meta_data = index_files()
-    end_time = time.time()
-    print(f"Indexing complete in {end_time - start_time:.2f} sec    onds. You can now use the BM25 retriever for searching.")
-    review_results(path_docs, k=1, meta_data=meta_data)
-    review_results(path_docs, k=2, meta_data=meta_data)
-    review_results(path_docs, k=5, meta_data=meta_data)
-    review_results(path_docs, k=10, meta_data=meta_data)
-    print("==================================================")
-    review_results(path_code, k=1, meta_data=meta_data)
-    review_results(path_code, k=2, meta_data=meta_data)
-    review_results(path_code, k=5, meta_data=meta_data)
-    review_results(path_code, k=10, meta_data=meta_data)
 
-if __name__ == "__main__":
-    main()
