@@ -32,8 +32,8 @@ def index_files() -> List[dict]:
         exit(3)
     
 
-if __name__ == "__main__":
-    start_time = time.time()
-    index_files()
-    end_time = time.time()
-    print(f"Indexing complete in {end_time - start_time:.2f} seconds. You can now use the BM25 retriever for searching.")
+# if __name__ == "__main__":
+#     start_time = time.time()
+#     index_files()
+#     end_time = time.time()
+#     print(f"Indexing complete in {end_time - start_time:.2f} seconds. You can now use the BM25 retriever for searching.")
