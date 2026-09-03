@@ -14,7 +14,7 @@ def retrieval(query: str, k: int):
         exit(4)
 
 def main():
-    query="What's the default value of trust_remote_code in vLLM's LLM class constructor?"
+    query="Who wrote 'To Kill a Mockingbird'?"
     k=5
     start_time = time.time()
     meta_data = index_files()
@@ -23,10 +23,9 @@ def main():
     results, scores = retrieval(query, k)
     print(f"Top {k} results for query: '{query}'")
     for i in range(len(results[0])):
+        doc_idx = results[0][i]
         print(f"\nResult {i + 1}:")
-        # print(f"Score: {score}")
-        # print(f"Content: {result}")
-        print(f"{meta_data[i]['file_path']}, [{meta_data[i]['start']}, {meta_data[i]['end']}]")
+        print(f"{meta_data[doc_idx]['file_path']}, [{meta_data[doc_idx]['start']}, {meta_data[doc_idx]['end']}]")
 
 
 if __name__ == "__main__":
