@@ -4,7 +4,7 @@ from langchain_core.documents import Document
 import time, bm25s, pathlib
 
 
-data_path = pathlib.Path("vllm-0.10.1")
+data_path = pathlib.Path("data/raw/vllm-0.10.1")
 chunk_size=500
 
 def index_files() -> List[dict]:
