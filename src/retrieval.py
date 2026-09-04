@@ -1,6 +1,4 @@
-import time
 import bm25s
-
 
 def retrieval(query: str, k: int):
     try:

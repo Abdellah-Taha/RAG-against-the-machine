@@ -27,17 +27,14 @@ def review_results(path: str, k: int, meta_data: List[dict]):
 
     student_search_results = total_search_results(data_set, k, meta_data)
     for i, result in enumerate(student_search_results.search_results):
-        # print(f"\nQuestion {i+1}: {result.question}")
-        
         ground_truth_paths = [s["file_path"] for s in source[i]]
+        # ground_truth_paths_overlap = [(s["first_character_index"], s["last_character_index"]) for s in source[i]]
         student_paths = result.retrieved_sources
         matches = [path.file_path for path in student_paths if path.file_path in ground_truth_paths]
         if matches:
-            # print(f"✅ Success! Found true path(s): {matches}")
             correct_count += 1
             total +=1
         else:
-            # print(f"❌ Missed. Expected: {ground_truth_paths[0]}")
             total +=1
     print(f"Total Questions: {total}")
     print(f"total student answers: {len(student_search_results.search_results)}")
