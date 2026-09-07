@@ -38,3 +38,7 @@ def generate_response(prompt: str,context: List[str], max_length: int = 100):
     super_prompt = f"{prompt}\n\nContext:\n" + "\n".join(context) + "\nResponse:"
 
     return str(llm.generate(super_prompt, max_length))
+
+def call_llm_foreach_query(queries: List[str], context: List[List[str]]):
+    for i, query in enumerate(queries):
+        generate_response(query, context[i])

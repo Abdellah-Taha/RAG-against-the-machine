@@ -25,7 +25,7 @@ def build_retrieved_data(query: str, k: int, meta_data: List[dict]):
         
     return minimal_search_results
 
-def total_search_results(queries: List[str], k: int, meta_data: List[dict]):
+def total_search_results(queries: List[str], k: int, meta_data: List[dict]) -> StudentSearchResults:
     student_search_results = StudentSearchResults(search_results=[], k=k)
     for query in queries:
         search_result = build_retrieved_data(query, k, meta_data)

@@ -7,6 +7,21 @@ from retrieval import retrieval
 from build_retrieved_data import total_search_results
 
 
+# def main():
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--k", type=int, default=5)
+    # parser.add_argument("--max_chunk_size", type=int, default=2000)
+    # parser.add_argument("--dataset_path", type=str, default="datasets_public/public/AnsweredQuestions/dataset_docs_public.json")
+    # args = parser.parse_args()
+    # start_time = time.time()
+    # meta_data = index_files(args.max_chunk_size)
+    # end_time = time.time()
+    # print(f"Indexing complete in {end_time - start_time:.2f} sec    onds. You can now use the BM25 retriever for searching.")
+    # review_results(args.dataset_path, args.k, meta_data=meta_data)
+    # print("==================================================")
+    # review_results("datasets_public/public/AnsweredQuestions/dataset_code_public.json", args.k, meta_data=meta_data)
+    
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--k", type=int, default=5)
@@ -14,25 +29,17 @@ def main():
     parser.add_argument("--dataset_path", type=str, default="datasets_public/public/AnsweredQuestions/dataset_docs_public.json")
     args = parser.parse_args()
     start_time = time.time()
+    #indexing the data files
     meta_data = index_files(args.max_chunk_size)
     end_time = time.time()
-    print(f"Indexing complete in {end_time - start_time:.2f} sec    onds. You can now use the BM25 retriever for searching.")
-    review_results(args.dataset_path, args.k, meta_data=meta_data)
-    print("==================================================")
-    review_results("datasets_public/public/AnsweredQuestions/dataset_code_public.json", args.k, meta_data=meta_data)
-    # 
+    print(f"Indexing complete in {end_time - start_time:.2f} seconds. You can now use the BM25 retriever for searching.")
+    #retrieving the questions from the json file
+    questions = retrieve_questions(args.dataset_path)
+    # retrieving the relevent data for each query (RA ANA LI KANTB HACHI MACHI AI AW9S) 
+    search_results = total_search_results(questions, args.k, meta_data=meta_data)
+    #sending the search results to the llm
+    llm = call_llm()
 
-# def main():
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("--k", type=int, default=5)
-#     parser.add_argument("--max_chunk_size", type=int, default=2000)
-#     parser.add_argument("--dataset_path", type=str, default="datasets_public/public/AnsweredQuestions/dataset_docs_public.json")
-#     args = parser.parse_args()
-#     start_time = time.time()
-#     meta_data = index_files(args.max_chunk_size)
-#     end_time = time.time()
-#     print(f"Indexing complete in {end_time - start_time:.2f} seconds. You can now use the BM25 retriever for searching.")
-#     total_search_results = total_search_results(retrieve_questions(args.dataset_path), args.k, meta_data=meta_data)
 
 if __name__ == "__main__":
     main()
