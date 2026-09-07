@@ -39,4 +39,4 @@ def review_results(path: str, k: int, meta_data: List[dict]):
     print(f"Total Questions: {total}")
     print(f"total student answers: {len(student_search_results.search_results)}")
     print(f"recall@{k}: {correct_count}/{total}  ({(correct_count/total)*100:.2f}%)")
-
+    # return student_search_results.search_results

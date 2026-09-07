@@ -1,23 +1,40 @@
+from functools import lru_cache
+from typing import List
+
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 
-def call_llm(context, question):
-    model_name = "Qwen/Qwen3-0.6B"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        device_map="auto",
-        torch_dtype=torch.float16
-    )
-    prompt = "..."
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=150,       # Maximum length of the generated response
-        do_sample=True,           # Enables creative/random generation
-        temperature=0.7,          # Controls creativity (lower is more focused)
-        top_p=0.9,
-    )
-    response = tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
+class Llm:
+    def __init__(self,
+                 model_name: str = "Qwen/Qwen3-0.6B"):
+        self.model_name = model_name
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name)
 
-    print(response)
+    def generate(self, prompt: str, max_length: int = 100):
+        message = [
+            {"role": "system", "content": (
+                "You are a helpful assistant."
+                "Answer the question using the contextual information provided."
+            )},
+            {"role": "user", "content": prompt}
+        ]
+        input_text = self.tokenizer(message, return_tensors="pt", padding=True, truncation=True)
+        output = self.model.generate(**input_text,
+                                     max_length=max_length,
+                                     use_cache=True,
+                                     pad_token_id=self.tokenizer.pad_token_id,
+                                     eos_token_id=self.tokenizer.eos_token_id)
+        output_text = self.tokenizer.decode(output[0], skip_special_tokens=True)
+        return output_text
+
+@lru_cache()
+def call_llm():
+    return Llm()
+
+def generate_response(prompt: str,context: List[str], max_length: int = 100):
+    llm = call_llm()
+
+    super_prompt = f"{prompt}\n\nContext:\n" + "\n".join(context) + "\nResponse:"
+
+    return str(llm.generate(super_prompt, max_length))
