@@ -1,13 +1,34 @@
 from data_models import MinimalSearchResults, MinimalSource, StudentSearchResults
 from typing import List
-from retrieval import retrieval
+from retrieval import chromadb_retrieval, retrieval
 from functools import lru_cache
-from search_dataset import retrieve_question_id
 import time
 
 @lru_cache(maxsize=128)
 def cached_retrieval(query: str, max_k=50):
     return retrieval(query, max_k)
+
+@lru_cache(maxsize=128)
+def cached_chromadb_retrieval(query: str, max_k=50):
+    return chromadb_retrieval(query, max_k)
+
+def build_chromadb_retrieved_data(query: str, id: str, k: int, meta_data: List[dict]):
+    minimal_search_results = MinimalSearchResults(question_id=id, question=query, retrieved_sources=[])
+    results = cached_chromadb_retrieval(query, max_k=50)
+    
+    limit = min(k,len(results))
+    
+    for i in range(limit):
+        doc_idx = results['ids'][0][i]
+        minimal_source = MinimalSource(
+            file_path=meta_data[doc_idx]['file_path'],
+            first_character_index=meta_data[doc_idx]['start'],
+            last_character_index=meta_data[doc_idx]['end'],
+        )
+        minimal_search_results.retrieved_sources.append(minimal_source)
+
+    return minimal_search_results
+
 
 def build_retrieved_data(query: str,id: str, k: int, meta_data: List[dict]):
     minimal_search_results = MinimalSearchResults(question_id=id, question=query, retrieved_sources=[])
@@ -30,5 +51,12 @@ def total_search_results(queries: List[str],question_ids: List[str], k: int, met
     student_search_results = StudentSearchResults(search_results=[], k=k)
     for query, id in zip(queries, question_ids):
         search_result = build_retrieved_data(query, id, k, meta_data)
+        student_search_results.search_results.append(search_result)
+    return student_search_results
+
+def total_chromadb_search_results(queries: List[str], question_ids: List[str], k: int, meta_data: List[dict]) -> StudentSearchResults:
+    student_search_results = StudentSearchResults(search_results=[], k=k)
+    for query, id in zip(queries, question_ids):
+        search_result = build_chromadb_retrieved_data(query, id, k, meta_data)
         student_search_results.search_results.append(search_result)
     return student_search_results

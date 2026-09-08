@@ -4,7 +4,8 @@ from langchain_core.documents import Document
 import bm25s, pathlib
 import chromadb
 
-BATCH_SIZE = 3500
+
+BATCH_SIZE = 600
 data_path = pathlib.Path("data/raw/vllm-0.10.1")
 
 def index_files(chunk_size: int) -> List[dict]:
@@ -33,27 +34,36 @@ def index_files(chunk_size: int) -> List[dict]:
 def chromadb_indexing(chunk_size: int):
     try:
         sample = retrieve_files(data_path)  
-        documents: List[Document] = load_and_split(sample, chunk_size)
+        documents: List = load_and_split(sample, chunk_size)
         content = []
         metadata = []
+        chunk_ids = []
+
         for document in documents:
             content.append(document.page_content)
+            
+            # Generate the unique chunk ID once
+            current_chunk_id = f"{document.metadata['source']}_{document.metadata['start_index']}"
+            chunk_ids.append(current_chunk_id)
+            
             metadata.append({
-            "file_path": document.metadata["source"],
-            "start": document.metadata["start_index"],
-            "end": document.metadata["start_index"] + len(document.page_content),
-            "chunk_id": document.metadata["source"] + "_" + str(document.metadata["start_index"])
+                "file_path": document.metadata["source"],
+                "start": document.metadata["start_index"],
+                "end": document.metadata["start_index"] + len(document.page_content),
+                "chunk_id": current_chunk_id
             })
-        chunk_ids = [doc.metadata["source"] + "_" + str(doc.metadata["start_index"]) for doc in documents]
+
         if len(chunk_ids) != len(set(chunk_ids)):
             raise ValueError("Duplicate chunk_id found in metadata. Each chunk must have a unique chunk_id.")
-        client = chromadb.Client()
-        chromadb.PersistentClient(path="data/processed/chroma_index")
+
+        client = chromadb.PersistentClient(path="data/processed/chroma_index")
         collection = client.get_or_create_collection(name="rag_collection")
+
         for i in range(0, len(content), BATCH_SIZE):
             batch_content = content[i:i + BATCH_SIZE]
             batch_metadata = metadata[i:i + BATCH_SIZE]
-            batch_ids = [str(i) for i in range(i, i + len(batch_content))]
+            batch_ids = chunk_ids[i:i + BATCH_SIZE]
+            
             collection.add(
                 documents=batch_content,
                 metadatas=batch_metadata,
@@ -66,12 +76,14 @@ def chromadb_indexing(chunk_size: int):
 
 import time
 def main():
-    start_time = time.time()
     chunk_size = 2000
+    start_time = time.time()
     index_files(chunk_size)
+    end_time = time.time()
+    print(f"BM25 indexing complete in {end_time - start_time:.2f} seconds.")
+    start_time = time.time()
     chromadb_indexing(chunk_size)
     end_time = time.time()
-    print(f"Indexing complete in {end_time - start_time:.2f} seconds.")
-
+    print(f"chromadb indexing complete in {end_time - start_time:.2f} seconds.")
 if __name__ == "__main__":
     main()
