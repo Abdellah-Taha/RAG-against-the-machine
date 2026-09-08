@@ -1,9 +1,9 @@
 import argparse
-import time, tqdm
+import time
 from search_dataset import retrieve_questions, review_results
 from indexing import index_files
-from llm_call import generate_response, Llm, call_llm, call_llm_foreach_query, json_dump_search_and_answers, json_dump_search_results
-from retrieval import retrieval
+from llm_call import call_llm, call_llm_foreach_query, json_dump_search_and_answers, json_dump_search_results
+# from retrieval import retrieval
 from build_retrieved_data import total_search_results
 
 
@@ -30,7 +30,7 @@ def main():
     print(f"\nTime taken: {end - start:.2f}")
     json_dump_search_and_answers(student_result_and_answers, "data/output/search_results_and_answer/output.json")
     json_dump_search_results(student_result_and_answers, "data/output/search_results/output.json")
-
+    review_results("datasets_public/public/AnsweredQuestions/dataset_docs_public.json", args.k, meta_data)
 
 if __name__ == "__main__":
     main()
