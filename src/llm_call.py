@@ -1,8 +1,8 @@
 from functools import lru_cache
 from typing import List
-from data_models import StudentSearchResults, MinimalSearchResults, MinimalSource
+from data_models import StudentSearchResults, MinimalSearchResults, MinimalSource,StudentSearchResultsAndAnswer, MinimalAnswer
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import re
+import re, json
 
 
 def strip_thinking(text: str) -> str:
@@ -83,5 +83,17 @@ def call_llm_foreach_query(context: StudentSearchResults):
         print(f"Question: {result.question}")
         print(f"response: {responses[i]}")
         print("=======================================================")
-        
-    return responses
+    for i, result in enumerate(context.search_results):
+        # Create a MinimalAnswer object for each response
+        minimal_answer = MinimalAnswer(
+            answer=responses[i]
+        )
+        # You can store or process the minimal_answer as needed
+        student_search_results_and_answer = StudentSearchResultsAndAnswer(
+            search_results=[minimal_answer],
+            k=context.k
+        )
+        return student_search_results_and_answer
+
+def json_dump():
+    ...
