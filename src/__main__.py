@@ -7,21 +7,6 @@ from retrieval import retrieval
 from build_retrieved_data import total_search_results
 
 
-# def main():
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--k", type=int, default=5)
-    # parser.add_argument("--max_chunk_size", type=int, default=2000)
-    # parser.add_argument("--dataset_path", type=str, default="datasets_public/public/AnsweredQuestions/dataset_docs_public.json")
-    # args = parser.parse_args()
-    # start_time = time.time()
-    # meta_data = index_files(args.max_chunk_size)
-    # end_time = time.time()
-    # print(f"Indexing complete in {end_time - start_time:.2f} sec    onds. You can now use the BM25 retriever for searching.")
-    # review_results(args.dataset_path, args.k, meta_data=meta_data)
-    # print("==================================================")
-    # review_results("datasets_public/public/AnsweredQuestions/dataset_code_public.json", args.k, meta_data=meta_data)
-    
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--k", type=int, default=5)
@@ -40,13 +25,10 @@ def main():
     #sending the search results to the llm
     llm = call_llm()
     start = time.time()
-    responses = call_llm_foreach_query(questions, search_results)
-    for i, response in enumerate(responses):
-        print(f"Question: {questions[i]}")
-        print(f"Response: {response}")
-        print("==================================================")
+    call_llm_foreach_query(search_results)
     end = time.time()
     print(f"\nTime taken: {end - start:.2f}")
+
 
 if __name__ == "__main__":
     main()

@@ -2,6 +2,12 @@ from functools import lru_cache
 from typing import List
 from data_models import StudentSearchResults, MinimalSearchResults, MinimalSource
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import re
+
+
+def strip_thinking(text: str) -> str:
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
 
 class Llm:
     def __init__(self,
@@ -13,49 +19,69 @@ class Llm:
     def generate(self, prompt: str, max_new_tokens=150):
         message = [
             {"role": "system", "content": (
-                "You are a helpful assistant."
-                "Answer the question using the contextual information provided."
+                "You are a helpful assistant. Answer the question using only the "
+                "contextual information provided. Give a direct, concise answer — "
+                "state the fact directly without restating the question or explaining "
+                "your reasoning. If the context includes a specific endpoint, command, "
+                "or value, quote it exactly."
             )},
             {"role": "user", "content": prompt}
         ]
         prompt_text = self.tokenizer.apply_chat_template(
             message,
-            tokenize=False, 
-            add_generation_prompt=True
+            tokenize=False,
+            add_generation_prompt=True,
+            enable_thinking=False
         )
         input_text = self.tokenizer(
             prompt_text,
             return_tensors="pt",
             padding=True,
             truncation=True)
+
+        input_length = input_text["input_ids"].shape[1]  # number of prompt tokens
+
         output = self.model.generate(**input_text,
-                                     max_new_tokens=max_new_tokens,
-                                     use_cache=True,
-                                     pad_token_id=self.tokenizer.pad_token_id,
-                                     eos_token_id=self.tokenizer.eos_token_id)
-        output_text = self.tokenizer.decode(output[0], skip_special_tokens=True)
-        return output_text
+                                    max_new_tokens=max_new_tokens,
+                                    use_cache=True,
+                                    pad_token_id=self.tokenizer.pad_token_id,
+                                    eos_token_id=self.tokenizer.eos_token_id)
+
+        # Only decode the newly generated tokens, not the prompt
+        generated_tokens = output[0][input_length:]
+        output_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
+        return strip_thinking(output_text)
 
 @lru_cache()
 def call_llm():
     return Llm()
 
-def generate_response(prompt: str,context: MinimalSearchResults, max_new_tokens: int = 150):
+def extract_text_from_context(context: MinimalSearchResults):
+    for path in context.retrieved_sources:
+        with open(path.file_path, 'r', encoding='utf-8') as f:
+            text = f.read()
+            yield text[path.first_character_index:path.last_character_index]
+
+def generate_response(context: MinimalSearchResults, max_new_tokens: int = 150):
     llm = call_llm()
     #conver MinimalSource into a string then join it to the prompt
     result: List[str] = []
-    for source in context.retrieved_sources:
-        result.append("file_path: " + source.file_path +
-                      " first_index: " + str(source.first_character_index) +
-                      " last_index: " + str(source.last_character_index) +
-                      "\n")
-    super_prompt = f"{prompt}\n\nContext:\n" + "\n".join(result) + "\nResponse:"
+    for text in extract_text_from_context(context):
+        result.append(text)
+    super_prompt = f"{context.question}\n\nContext:\n" + "\n".join(result) + "\nResponse:"
     # print(super_prompt)
     return str(llm.generate(super_prompt, max_new_tokens))
 
-def call_llm_foreach_query(queries: List[str], context: StudentSearchResults):
+def call_llm_foreach_query(context: StudentSearchResults):
     responses = []
-    for i, query in enumerate(queries):
-        # print(context.search_results[i].retrieved_sources)
-        responses.append(generate_response(query, context.search_results[i]))
+    for i, result in enumerate(context.search_results):
+        # Pass ONLY the result object to generate_response
+        # (It already extracts context.query inside the function)
+        response_text = generate_response(result)
+        responses.append(response_text)
+        
+        print(f"Question: {result.question}")
+        print(f"response: {responses[i]}")
+        print("=======================================================")
+        
     return responses
