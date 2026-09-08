@@ -2,7 +2,7 @@ import argparse
 import time, tqdm
 from search_dataset import retrieve_questions, review_results
 from indexing import index_files
-from llm_call import generate_response, Llm, call_llm
+from llm_call import generate_response, Llm, call_llm, call_llm_foreach_query
 from retrieval import retrieval
 from build_retrieved_data import total_search_results
 
@@ -39,7 +39,14 @@ def main():
     search_results = total_search_results(questions, args.k, meta_data=meta_data)
     #sending the search results to the llm
     llm = call_llm()
-
+    start = time.time()
+    responses = call_llm_foreach_query(questions, search_results)
+    for i, response in enumerate(responses):
+        print(f"Question: {questions[i]}")
+        print(f"Response: {response}")
+        print("==================================================")
+    end = time.time()
+    print(f"\nTime taken: {end - start:.2f}")
 
 if __name__ == "__main__":
     main()
