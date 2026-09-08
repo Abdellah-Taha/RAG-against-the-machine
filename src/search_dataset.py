@@ -18,14 +18,17 @@ def retrieve_questions(file_path: str):
 def retrieve_data_source(file_path: str):
     data_set = parse_data_set(file_path)
     return [item["sources"] for item in data_set]
+
+def retrieve_question_id(file_path: str):
+    data_set = parse_data_set(file_path)
+    return [item["question_id"] for item in data_set]
     
-    
-def review_results(path: str, k: int, meta_data: List[dict]):
+def review_results(path: str, ids: List[str], k: int, meta_data: List[dict]):
     correct_count, total = 0, 0
     data_set = retrieve_questions(path)
     source = retrieve_data_source(path)
 
-    student_search_results = total_search_results(data_set, k, meta_data)
+    student_search_results = total_search_results(data_set, ids, k, meta_data)
     for i, result in enumerate(student_search_results.search_results):
         ground_truth_paths = [s["file_path"] for s in source[i]]
         # ground_truth_paths_overlap = [(s["first_character_index"], s["last_character_index"]) for s in source[i]]

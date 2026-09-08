@@ -2,14 +2,15 @@ from data_models import MinimalSearchResults, MinimalSource, StudentSearchResult
 from typing import List
 from retrieval import retrieval
 from functools import lru_cache
+from search_dataset import retrieve_question_id
 import time
 
 @lru_cache(maxsize=128)
 def cached_retrieval(query: str, max_k=50):
     return retrieval(query, max_k)
 
-def build_retrieved_data(query: str, k: int, meta_data: List[dict]):
-    minimal_search_results = MinimalSearchResults(question_id="", question=query, retrieved_sources=[])
+def build_retrieved_data(query: str,id: str, k: int, meta_data: List[dict]):
+    minimal_search_results = MinimalSearchResults(question_id=id, question=query, retrieved_sources=[])
     results, scores = cached_retrieval(query, max_k=50)
     
     limit = min(k, len(results[0]))
@@ -25,9 +26,9 @@ def build_retrieved_data(query: str, k: int, meta_data: List[dict]):
         
     return minimal_search_results
 
-def total_search_results(queries: List[str], k: int, meta_data: List[dict]) -> StudentSearchResults:
+def total_search_results(queries: List[str],question_ids: List[str], k: int, meta_data: List[dict]) -> StudentSearchResults:
     student_search_results = StudentSearchResults(search_results=[], k=k)
-    for query in queries:
-        search_result = build_retrieved_data(query, k, meta_data)
+    for query, id in zip(queries, question_ids):
+        search_result = build_retrieved_data(query, id, k, meta_data)
         student_search_results.search_results.append(search_result)
     return student_search_results

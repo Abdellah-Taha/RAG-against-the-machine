@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field
 from typing import List
 import uuid
 
-#this is the foundation but could be expanded
 
 class MinimalSource(BaseModel):
     file_path: str
