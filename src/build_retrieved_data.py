@@ -15,18 +15,18 @@ def cached_chromadb_retrieval(query: str, max_k=50):
 def build_chromadb_retrieved_data(query: str, id: str, k: int, meta_data: List[dict]):
     minimal_search_results = MinimalSearchResults(question_id=id, question=query, retrieved_sources=[])
     results = cached_chromadb_retrieval(query, max_k=50)
-    
-    limit = min(k,len(results))
-    
-    for i in range(limit):
-        doc_idx = results['ids'][0][i]
-        minimal_source = MinimalSource(
-            file_path=meta_data[doc_idx]['file_path'],
-            first_character_index=meta_data[doc_idx]['start'],
-            last_character_index=meta_data[doc_idx]['end'],
-        )
-        minimal_search_results.retrieved_sources.append(minimal_source)
+    meta_by_chunk_id = {m["chunk_id"]: m for m in meta_data} # create a mapping from chunk_id to meta_data for quick lookup
 
+    hit_ids = results["ids"][0] # get the list of hit ids for the first query
+    limit = min(k, len(hit_ids))
+
+    for i in range(limit):
+        m = meta_by_chunk_id[hit_ids[i]]
+        minimal_search_results.retrieved_sources.append(MinimalSource(
+            file_path=m["file_path"],
+            first_character_index=m["start"],
+            last_character_index=m["end"],
+        ))
     return minimal_search_results
 
 

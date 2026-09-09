@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import List
 from data_loading import retrieve_files, load_and_split
 from langchain_core.documents import Document
@@ -31,6 +32,7 @@ def index_files(chunk_size: int) -> List[dict]:
         print(f"Error during indexing: {e}")
         exit(3)
 
+@lru_cache(maxsize=128)
 def chromadb_indexing(chunk_size: int):
     try:
         sample = retrieve_files(data_path)  
@@ -42,7 +44,6 @@ def chromadb_indexing(chunk_size: int):
         for document in documents:
             content.append(document.page_content)
             
-            # Generate the unique chunk ID once
             current_chunk_id = f"{document.metadata['source']}_{document.metadata['start_index']}"
             chunk_ids.append(current_chunk_id)
             

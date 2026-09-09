@@ -20,6 +20,7 @@ def retrieval(query: str, k: int):
     except Exception as e:
         print(f"Error during retrieval: {e}, line: {e.__traceback__.tb_lineno}")
         exit(4)
+        
 
 def chromadb_retrieval(query: str, k: int):
     try:
